@@ -1,8 +1,11 @@
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.disposables.Disposable
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import java.util.concurrent.TimeUnit
 
-fun main() {
+fun main(args: Array<String>) {
     val observer: Observer<Any> = object : Observer<Any> {
         override fun onComplete() {
             println("All Completed")
@@ -17,29 +20,19 @@ fun main() {
         }
 
         override fun onSubscribe(d: Disposable) {
-            println("New Subscription ")
+            println("New Subscription $d")
         }
     }//Create Observer
-    Observable.just("A String").subscribe(observer)
-    Observable.just(42).subscribe(observer)
-    Observable.just(
-        listOf(
-            "String 1", "String 2", "String 3", "String 4"
-        )
-    ).subscribe(observer)
-    Observable.just(
-        mapOf(
-            Pair("Key 1", "Value 1"), Pair("Key 2", "Value 2"), Pair(
-                "Key 3", "Value 3"
-            )
-        )
-    ).subscribe(observer)
-    Observable.just(
-        arrayListOf(
-            1, 2, 3, 4, 5, 6
-        )
-    ).subscribe(observer)
-    Observable.just(
-        "String 1", "String 2", "String 3","String 1", "String 2", "String 3",
-    ).subscribe(observer)//1
+    Observable.range(1, 10).subscribe(observer)//(1)
+    Observable.empty<String>().subscribe(observer)//(2)
+    runBlocking {
+        //doesn't complete forever, sends number out every x period.
+        Observable.interval(300, TimeUnit.MILLISECONDS).subscribe(observer)//(3)
+        delay(900)
+
+
+        //simply completes after delay 400.
+        Observable.timer(400, TimeUnit.MILLISECONDS).subscribe(observer)//(4)
+        delay(9000)
+    }
 }
