@@ -1,33 +1,37 @@
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.toObservable
 
 fun main() {
-    val observer: Observer<Any> = object : Observer<Any> {
+    val observer: Observer<String> = object : Observer<String> {
         override fun onComplete() {
             println("All Completed")
         }
-
-        override fun onNext(item: Any) {
+        override fun onNext(item: String) {
             println("Next $item")
         }
-
         override fun onError(e: Throwable) {
-            println("Error Occurred $e")
+            println("onError $e")
         }
-
-        override fun onSubscribe(d: Disposable) {//5
-            println("Subscribed to $d")
+        override fun onSubscribe(d: Disposable) {
+            println("New Subscription ")
         }
+    }//Create Observer
+    val observable: Observable<String> = Observable.create<String> {//1
+        it.onNext("Emit 1")
+        it.onNext("Emit 2")
+        it.onNext("Emit 3")
+        it.onNext("Emit 4")
+        it.onComplete()
     }
-    val observable: Observable<Any> = listOf("One", 2, "Three", "Four", 4.5, "Five", 6.0f).toObservable() //6
     observable.subscribe(observer)
+    val observable2: Observable<String> = Observable.create<String> {//2
+        it.onNext("Emit 1")
+        it.onNext("Emit 2")
+        it.onNext("Emit 3")
+        it.onNext("Emit 4")
+        it.onError(Exception("My Custom Exception"))
+    }
+    observable2.subscribe(observer)
 
-    val observableOnList: Observable<List<Any>> = Observable.just(
-        listOf(
-            "One", 2, "Three", "Four", 4.5, "Five", 6.0f
-        ), listOf("List with Single Item"), listOf(1, 2, 3, 4, 5, 6)
-    )
-    observableOnList.subscribe(observer)
 }
