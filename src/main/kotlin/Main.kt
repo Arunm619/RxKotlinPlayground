@@ -1,15 +1,13 @@
-import io.reactivex.Observable
-import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.rxkotlin.toObservable
+import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.Subject
 
 fun main() {
-    val list: List<Any> = listOf(
-        "One", 2, "Three", "Four", 4.5, "Five", 6.0f
-    ) // 1
-    val observable: Observable<Any> = list.toObservable()
-    observable.subscribeBy( // named arguments for
-            //lambda Subscribers
-            onNext = {
-                println(it)
-            }, onError = { it.printStackTrace() }, onComplete = { println("Done!") })
+    val subject: Subject<Int> = PublishSubject.create()
+    subject.map { isEven(it) }.subscribe { println("The number is ${(if (it) "Even" else "Odd")}") }
+    subject.onNext(4)
+    subject.onNext(9)
+}
+
+fun isEven(it: Int): Boolean {
+    return it.mod(2) == 0
 }
