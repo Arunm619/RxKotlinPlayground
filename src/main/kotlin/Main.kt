@@ -1,17 +1,33 @@
-import io.reactivex.Maybe
-import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.Observable
+import io.reactivex.Observer
+import io.reactivex.disposables.Disposable
+import io.reactivex.rxkotlin.toObservable
 
 fun main() {
-    val maybeValue: Maybe<Int> = Maybe.just(14)//1
-    maybeValue.subscribeBy(//2
-        onComplete = {println("Completed Empty")},
-        onError = {println("Error $it")},
-        onSuccess = { println("Completed with value $it")}
+    val observer: Observer<Any> = object : Observer<Any> {
+        override fun onComplete() {
+            println("All Completed")
+        }
+
+        override fun onNext(item: Any) {
+            println("Next $item")
+        }
+
+        override fun onError(e: Throwable) {
+            println("Error Occurred $e")
+        }
+
+        override fun onSubscribe(d: Disposable) {//5
+            println("Subscribed to $d")
+        }
+    }
+    val observable: Observable<Any> = listOf("One", 2, "Three", "Four", 4.5, "Five", 6.0f).toObservable() //6
+    observable.subscribe(observer)
+
+    val observableOnList: Observable<List<Any>> = Observable.just(
+        listOf(
+            "One", 2, "Three", "Four", 4.5, "Five", 6.0f
+        ), listOf("List with Single Item"), listOf(1, 2, 3, 4, 5, 6)
     )
-    val maybeEmpty:Maybe<Int> = Maybe.empty()//3
-    maybeEmpty.subscribeBy(
-        onComplete = {println("Completed Empty")},
-        onError = {println("Error $it")},
-        onSuccess = { println("Completed with value $it")}
-    )
+    observableOnList.subscribe(observer)
 }
