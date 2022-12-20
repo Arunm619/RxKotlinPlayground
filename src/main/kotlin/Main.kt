@@ -1,12 +1,15 @@
 fun main(args: Array<String>) {
-    var a = 0
-    var b = 1
-    print("$a, ")
-    print("$b, ")
-    for(i in 2..100) {
-        val c = a+b
-        print("$c, ")
-        a=b
-        b=c
+    val fibonacciSeries = sequence {//(1)
+        var a = 0L
+        var b = 1L
+        yield(a)//(2)
+        yield(b)
+        while (true) {
+            val c = a + b
+            yield(c)//(3)
+            a = b
+            b = c
+        }
     }
+    println(fibonacciSeries.take(100).joinToString(","))
 }
