@@ -1,6 +1,9 @@
 import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.disposables.Disposable
+import java.util.concurrent.Callable
+import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
 
 fun main() {
     val observer: Observer<String> = object : Observer<String> {
@@ -11,27 +14,33 @@ fun main() {
             println("Next $item")
         }
         override fun onError(e: Throwable) {
-            println("onError $e")
+            println("Error Occured ${e.message}")
         }
         override fun onSubscribe(d: Disposable) {
-            println("New Subscription ")
+            println("New Subscription $d")
         }
     }//Create Observer
-    val observable: Observable<String> = Observable.create<String> {//1
-        it.onNext("Emit 1")
-        it.onNext("Emit 2")
-        it.onNext("Emit 3")
-        it.onNext("Emit 4")
-        it.onComplete()
+    val list = listOf("String 1","String 2","String 3","String 4")
+    val observableFromIterable: Observable<String> =
+        Observable.fromIterable(list)//1
+    observableFromIterable.subscribe(observer)
+    val callable = object : Callable<String> {
+        override fun call(): String {
+            return "From Callable"
+        }
     }
-    observable.subscribe(observer)
-    val observable2: Observable<String> = Observable.create<String> {//2
-        it.onNext("Emit 1")
-        it.onNext("Emit 2")
-        it.onNext("Emit 3")
-        it.onNext("Emit 4")
-        it.onError(Exception("My Custom Exception"))
+    val observableFromCallable:Observable<String> =
+        Observable.fromCallable(callable)//2
+    observableFromCallable.subscribe(observer)
+    val future:Future<String> = object : Future<String> {
+        override fun get(): String = "Hello From Future"
+        override fun get(timeout: Long, unit: TimeUnit?): String =
+            "Hello From Future"
+        override fun isDone(): Boolean = true
+        override fun isCancelled(): Boolean = false
+        override fun cancel(mayInterruptIfRunning: Boolean):Boolean = false
     }
-    observable2.subscribe(observer)
-
+    val observableFromFuture: Observable<String> =
+        Observable.fromFuture(future)//3
+    observableFromFuture.subscribe(observer)
 }
