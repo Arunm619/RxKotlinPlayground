@@ -1,5 +1,8 @@
 import io.reactivex.subjects.PublishSubject
 import io.reactivex.subjects.Subject
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import java.util.*
 
 fun runner() {
@@ -11,7 +14,9 @@ fun runner() {
     var line: String?
     do {
         line = readlnOrNull()
-        calculator.handleInput(line)
+        GlobalScope.async {
+            calculator.handleInput(line)
+        }
     } while (line != null && !line.lowercase(Locale.getDefault()).contains("exit"))
 
 }
@@ -64,7 +69,7 @@ class ReactiveCalculator(a: Int, b: Int) {
         subjectCalc.onNext(this)
     }
 
-    fun handleInput(inputLine: String?) {
+    suspend fun handleInput(inputLine: String?) {
         if (!inputLine.equals("exit")) {
             val pattern: java.util.regex.Pattern = java.util.regex.Pattern.compile("([a|b])(?:\\s)?=(?:\\s)?(\\d*)")
             var a: Int? = null
