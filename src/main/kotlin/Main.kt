@@ -1,8 +1,13 @@
-fun square(n:Int):Int {//(1)
-    return n*n
+fun highOrderFunc(a: Int, validityCheckFunc: (a: Int) -> Boolean) {//(1)
+    if (validityCheckFunc(a)) {//(2)
+        println("a $a is Valid")
+    } else {
+        println("a $a is Invalid")
+    }
 }
+
+fun Int.isEven() = this.mod(2) == 0
 fun main() {
-    println("named pure func square = ${square(3)}")
-    val cube = {n:Int -> n*n*n}//(2)
-    println("lambda pure func qube = ${cube(3)}")
+    highOrderFunc(12) { a: Int -> a.isEven() }//(3)
+    highOrderFunc(19) { a: Int -> a.isEven() }
 }
