@@ -1,24 +1,29 @@
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlin.system.measureTimeMillis
 
-suspend fun longRunningTsk():Long {//(1)
-   val time = measureTimeMillis {//(2)
-      println("Please wait")
-      delay(2000)//(3)
-      println("Delay Over")
-   }
-   return time
+suspend fun longRunningTsk(): Long {//(1)
+    val time = measureTimeMillis {//(2)
+        println("Please wait")
+        delay(2000)//(3)
+        println("Delay Over")
+    }
+    return time
 }
-fun main() {
-   runBlocking {
-      var sum = 0L//(4)
-      val times = 30
-     repeat(times) {
-        val exeTime = longRunningTsk()//(5)
-        println("Execution Time is $exeTime")
-        sum += exeTime
-     }
-      println("The total average duration is ${sum/times}")
-   }
+
+fun main(args: Array<String>) {
+    runBlocking {
+        println("aSync GlobalScope")
+        var time = measureTimeMillis {
+            val a1 = GlobalScope.async {
+                delay(1000)
+                delay(1000)
+            }
+            a1.await()
+        }
+        println("Total time: $time")
+
+    }
 }
