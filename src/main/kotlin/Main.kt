@@ -27,11 +27,15 @@ fun main(args: Array<String>) {
     Observable.empty<String>().subscribe(observer)//(2)
     runBlocking {
         //doesn't complete forever, sends number out every x period.
+        //Observable.interval(), emits numbers
+        //sequentially starting from 0, after each specified interval. It will continue emitting until you
+        //unsubscribe and until the program runs
         Observable.interval(300, TimeUnit.MILLISECONDS).subscribe(observer)//(3)
         delay(900)
 
 
         //simply completes after delay 400.
+        //Observable.timer(), will emit only once with 0 after the specified time elapsed.
         Observable.timer(400, TimeUnit.MILLISECONDS).subscribe(observer)//(4)
         delay(9000)
     }
