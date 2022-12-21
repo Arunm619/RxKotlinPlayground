@@ -1,21 +1,20 @@
-import io.reactivex.Observable
+import io.reactivex.Flowable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
 fun main() {
-    val observable = Observable.range(1, 200000)//1, 2, 3, 4, 5, 6, 7, 8, 9)//(1)
-    observable.map { MyItem(it) }//(2)
-        .observeOn(Schedulers.computation())//(3)
-        .subscribe {//(4)
+    Flowable.range(1, 1000)//(1)
+        .map { MyItem4(it) }//(2)
+        .observeOn(Schedulers.io()).subscribe({//(3)
             println("Received $it")
-            runBlocking { delay(1) }//(5)
-        }
-    runBlocking { delay(200000) }//(6)
+            runBlocking { delay(50) }//(4)
+        }, { it.printStackTrace() })
+    runBlocking { delay(60000) }//(5)
 }
 
-data class MyItem(val id: Int) {
+data class MyItem4(val id: Int) {
     init {
-        println("MyItem Created $id")//(7)
+        println("MyItem Created $id")
     }
 }
