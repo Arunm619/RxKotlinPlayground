@@ -11,7 +11,11 @@ fun main() {
     val subject = PublishSubject.create<Long>()//2
     observable.subscribe(subject)//3
     subject.subscribe {//4
-        println("Received $it")
+        println("Subscription 1 Received $it")
     }
     runBlocking { delay(1100) }//5
+    subject.subscribe {//6
+        println("Subscription 2 Received $it")
+    }
+    runBlocking { delay(1100) }//7
 }
