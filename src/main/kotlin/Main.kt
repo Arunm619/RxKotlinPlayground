@@ -9,7 +9,7 @@ import io.reactivex.subjects.AsyncSubject
  * ReplaySubject
  * */
 fun main() {
-    asyncSubject()
+    asyncSubjectOnlyExample()
 }
 
 /**
@@ -29,4 +29,35 @@ fun asyncSubject() {
         println("Complete")
     })
     subject.onComplete()//5
+}
+
+fun asyncSubjectOnlyExample() {
+    val subject = AsyncSubject.create<Int>()
+    subject.onNext(1)
+    subject.onNext(2)
+    subject.onNext(3)
+    subject.onNext(4)
+    subject.subscribe({
+        //onNext
+        println("S1 Received $it")
+    },{
+        //onError
+        it.printStackTrace()
+    },{
+        //onComplete
+        println("S1 Complete")
+    })
+    subject.onNext(5)
+    subject.subscribe({
+        //onNext
+        println("S2 Received $it")
+    },{
+        //onError
+        it.printStackTrace()
+    },{
+        //onComplete
+        println("S2 Complete")
+    })
+    //have to trigger onComplete
+    subject.onComplete()
 }
