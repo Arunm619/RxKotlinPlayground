@@ -1,11 +1,17 @@
-import io.reactivex.rxkotlin.toObservable
+import io.reactivex.Observable
+import io.reactivex.subjects.PublishSubject
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import java.util.concurrent.TimeUnit
 
 fun main() {
-    val connectableObservable = listOf("String 1","String 2","String 3","String 4","String 5").toObservable()
-    .publish()//1
-    connectableObservable.subscribe { println("Subscription 1: $it") }//2
-    connectableObservable.map(String::reversed)//3
-        .subscribe { println("Subscription 2 $it") }//4
-    connectableObservable.connect()//5
-    connectableObservable.subscribe { println("Subscription 3: $it") }//6 //Will not receive emissions
+    val observable = Observable.interval(
+        100, TimeUnit.MILLISECONDS
+    )//1
+    val subject = PublishSubject.create<Long>()//2
+    observable.subscribe(subject)//3
+    subject.subscribe {//4
+        println("Received $it")
+    }
+    runBlocking { delay(1100) }//5
 }
