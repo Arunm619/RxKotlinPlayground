@@ -1,5 +1,4 @@
-import io.reactivex.subjects.BehaviorSubject
-import io.reactivex.subjects.PublishSubject
+import io.reactivex.subjects.ReplaySubject
 
 /**
  * AsyncSubject
@@ -8,7 +7,7 @@ import io.reactivex.subjects.PublishSubject
  * ReplaySubject
  * */
 fun main() {
-    val subject = BehaviorSubject.create < Int >()
+    val subject = ReplaySubject.create < Int >()
     subject.onNext(1)
     subject.onNext(2)
     subject.onNext(3)
