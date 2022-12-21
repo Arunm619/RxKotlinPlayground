@@ -8,7 +8,7 @@ import io.reactivex.subjects.PublishSubject
  * ReplaySubject
  * */
 fun main() {
-    val subject = PublishSubject.create < Int >()
+    val subject = BehaviorSubject.create < Int >()
     subject.onNext(1)
     subject.onNext(2)
     subject.onNext(3)
@@ -34,5 +34,6 @@ fun main() {
         //onComplete
         println("S2 Complete")
     })
+    subject.onNext(6)
     subject.onComplete()
 }
