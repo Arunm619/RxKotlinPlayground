@@ -1,21 +1,32 @@
 import io.reactivex.Observable
-import io.reactivex.subjects.PublishSubject
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import java.util.concurrent.TimeUnit
+import io.reactivex.rxkotlin.subscribeBy
+import io.reactivex.subjects.AsyncSubject
 
+/**
+ * AsyncSubject
+ * PublishSubject
+ * BehaviorSubject
+ * ReplaySubject
+ * */
 fun main() {
-    val observable = Observable.interval(
-        100, TimeUnit.MILLISECONDS
-    )//1
-    val subject = PublishSubject.create<Long>()//2
+    asyncSubject()
+}
+
+/**
+ * AsyncSubject only emits the last value of the source observable (Observable it listens
+ * on), and the last emission only. To say things more clearly, AsyncSubject will emit the last
+ * value it got, and will emit it only one time.
+ * */
+fun asyncSubject() {
+    val observable = Observable.just(1, 2, 3, 4)//1
+    val subject = AsyncSubject.create<Int>()//2
     observable.subscribe(subject)//3
-    subject.subscribe {//4
-        println("Subscription 1 Received $it")
-    }
-    runBlocking { delay(1100) }//5
-    subject.subscribe {//6
-        println("Subscription 2 Received $it")
-    }
-    runBlocking { delay(1100) }//7
+    subject.subscribeBy(onNext = {//4
+        println("Received $it")
+    }, onError = {
+        it.printStackTrace()
+    }, onComplete = {
+        println("Complete")
+    })
+    subject.onComplete()//5
 }
