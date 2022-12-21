@@ -1,21 +1,21 @@
 import io.reactivex.Observable
 import io.reactivex.schedulers.Schedulers
-import io.reactivex.subjects.BehaviorSubject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
 fun main() {
-    val observable = Observable.just(1,2,3,4,5,6,7,8,9)//(1)
-    val subject = BehaviorSubject.create<Int>()
-    subject//.observeOn(Schedulers.computation())//(2)
-        .subscribe {//(3)
-            println("Subs 1 Received $it")
-            runBlocking { delay(200) }//(4)
+    val observable = Observable.range(1, 200000)//1, 2, 3, 4, 5, 6, 7, 8, 9)//(1)
+    observable.map { MyItem(it) }//(2)
+        .observeOn(Schedulers.computation())//(3)
+        .subscribe {//(4)
+            println("Received $it")
+            runBlocking { delay(1) }//(5)
         }
-    subject.observeOn(Schedulers.computation())//(5)
-        .subscribe {//(6)
-            println("Subs 2 Received $it")
-        }
-    observable.subscribe(subject)//(7)
-    runBlocking { delay(2000) }//(8)
+    runBlocking { delay(200000) }//(6)
+}
+
+data class MyItem(val id: Int) {
+    init {
+        println("MyItem Created $id")//(7)
+    }
 }
