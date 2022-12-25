@@ -1,15 +1,25 @@
 import io.reactivex.Observable
-import io.reactivex.rxkotlin.toObservable
+import io.reactivex.functions.BiFunction
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import java.util.concurrent.TimeUnit
 
-fun main() {
-    val observable1 = Observable.range(1,10)
-    val observable2 = listOf("String 1","String 2","String 3",
-        "String 4","String 5","String 6","String 7","String 8",
-        "String 9","String 10").toObservable()
-    observable1.zipWith(observable2) { e1: Int, e2: String ->
-        "$e2 $e1"
-    }//(1)
-        .subscribe {
+fun main(args: Array<String>) {
+    val observable1 =
+        Observable.interval(100, TimeUnit.MILLISECONDS)//(1)
+    val observable2 =
+        Observable.interval(250,TimeUnit.MILLISECONDS)//(2)
+    Observable.combineLatest(observable1,observable2
+    ) { t1: Long, t2: Long -> "t1: $t1, t2: $t2" }// (3)
+        .subscribe{
             println("Received $it")
         }
+    runBlocking { delay(1100) }
 }
+
+/**
+ * The combineLatest operator processes and emits the value as soon
+ * as it gets an emit from any of its source producers by using the last emitted value for all
+ * other source producers.
+ *
+ * */
