@@ -5,9 +5,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
 fun main() {
-    val source = Observable.range(1, 129)
+    val source = Observable.range(1, 1000)
     source.toFlowable(BackpressureStrategy.MISSING)//(1)
-        .onBackpressureDrop { print("Dropped $it;\t") }//(2)
+        .onBackpressureLatest()
         .map { MyItem12(it) }.observeOn(Schedulers.io()).subscribe {
             print("Rec. $it;\n")
             runBlocking { delay(100) }
