@@ -6,17 +6,26 @@ import org.reactivestreams.Subscriber
 import org.reactivestreams.Subscription
 
 fun main() {
-    Flowable.range(1, 1000)//(1)
-        .map { MyItem5(it) }//(2)
-        .observeOn(Schedulers.io()).subscribe(object : Subscriber<MyItem5> {
-            //(3)
+    Flowable.range(1, 15).map { MyItem6(it) }
+        .observeOn(Schedulers.io())
+        .subscribe(object : Subscriber<MyItem6> {
+            lateinit var subscription: Subscription//(1)
             override fun onSubscribe(subscription: Subscription) {
-                subscription.request(Long.MAX_VALUE)//(4)
+                this.subscription = subscription
+                subscription.request(5)//(2)
             }
 
-            override fun onNext(s: MyItem5?) {
+            override fun onNext(s: MyItem6?) {
                 runBlocking { delay(50) }
                 println("Subscriber received " + s!!)
+                if (s.id == 5) {//(3)
+                    println("Requesting two more")
+                    subscription.request(2)//(4)
+                }
+                if(s.id == 7) {
+                    println("Requesting 5 more")
+                    subscription.request(5)//(4)
+                }
             }
 
             override fun onError(e: Throwable) {
@@ -27,10 +36,12 @@ fun main() {
                 println("Done!")
             }
         })
-    runBlocking { delay(60000) }
+    runBlocking {
+        delay(10000)
+    }
 }
 
-data class MyItem5(val id: Int) {
+data class MyItem6(val id: Int) {
     init {
         println("MyItem Created $id")
     }
