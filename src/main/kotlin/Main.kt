@@ -1,31 +1,22 @@
-import io.reactivex.Flowable
-import io.reactivex.schedulers.Schedulers
+import io.reactivex.rxkotlin.toFlowable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
 fun main() {
-    val flowable = Flowable.generate<Int> {
-        it.onNext(GenerateFlowableItem.item)
-    }//(1)
-    flowable.map { MyItemFlowable(it) }.observeOn(Schedulers.io()).subscribe {
-            runBlocking { delay(100) }
-            println("Next $it")
-        }//(2)
-    runBlocking { delay(700000) }
-}
-
-data class MyItemFlowable(val id: Int) {
-    init {
-        println("MyItemFlowable Created $id")
+    val connectableFlowable = listOf(
+        "String 1",
+        "String 2",
+        "String 3",
+        "String 4",
+        "String 5"
+    ).toFlowable()//(1)
+        .publish()//(2)
+    connectableFlowable.subscribe {
+        println("Subscription 1: $it")
+        runBlocking { delay(1000) }
+        println("Subscription 1 delay")
     }
-}
-
-object GenerateFlowableItem {
-    //(3)
-    var item: Int = 0
-        //(4)
-        get() {
-            field += 1
-            return field//(5)
-        }
+    connectableFlowable
+        .subscribe { println("Subscription 2 $it") }
+    connectableFlowable.connect()
 }
