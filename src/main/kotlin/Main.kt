@@ -1,30 +1,33 @@
-import io.reactivex.Observable
-import io.reactivex.Observer
-import io.reactivex.disposables.Disposable
+import io.reactivex.BackpressureStrategy
+import io.reactivex.Flowable
+import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import org.reactivestreams.Subscriber
+import org.reactivestreams.Subscription
 
 fun main() {
-    val observer: Observer<Int> = object : Observer<Int> {
+    val subscriber: Subscriber<Int> = object : Subscriber<Int> {
         override fun onComplete() {
             println("All Completed")
         }
-
         override fun onNext(item: Int) {
             println("Next $item")
         }
-
         override fun onError(e: Throwable) {
             println("Error Occured ${e.message}")
         }
-
-        override fun onSubscribe(d: Disposable) {
+        override fun onSubscribe(subscription: Subscription) {
             println("New Subscription ")
+            subscription.request(10)
         }
-    }//Create Observer
-    val observable: Observable<Int> = Observable.create<Int> {//1
+    }//(1)
+    val flowable: Flowable<Int> = Flowable.create<Int>({
         for (i in 1..10) {
             it.onNext(i)
         }
         it.onComplete()
-    }
-    observable.subscribe(observer)
+    }, BackpressureStrategy.BUFFER)//(2)
+    flowable.observeOn(Schedulers.io()).subscribe(subscriber)//(3)
+    runBlocking { delay(10000) }
 }
