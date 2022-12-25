@@ -1,10 +1,10 @@
-import io.reactivex.rxkotlin.toObservable
+import io.reactivex.Observable
 
-fun main(args: Array<String>) {
-    val observable = listOf(10,1,2,5,8,6,9)
-        .toObservable()
-    observable.elementAt(5)//(1)
-        .subscribe { println("Received $it") }
-    observable.elementAt(50)//(2)
-        .subscribe { println("Received $it") }
+fun main() {
+    Observable.range(1, 20)//(1)
+        .filter {//(2)
+            it % 2 == 0
+        }.subscribe {
+            println("Received $it")
+        }
 }
