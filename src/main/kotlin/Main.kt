@@ -1,48 +1,30 @@
-import io.reactivex.Flowable
-import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import org.reactivestreams.Subscriber
-import org.reactivestreams.Subscription
+import io.reactivex.Observable
+import io.reactivex.Observer
+import io.reactivex.disposables.Disposable
 
 fun main() {
-    Flowable.range(1, 15).map { MyItem6(it) }
-        .observeOn(Schedulers.io())
-        .subscribe(object : Subscriber<MyItem6> {
-            lateinit var subscription: Subscription//(1)
-            override fun onSubscribe(subscription: Subscription) {
-                this.subscription = subscription
-                subscription.request(5)//(2)
-            }
+    val observer: Observer<Int> = object : Observer<Int> {
+        override fun onComplete() {
+            println("All Completed")
+        }
 
-            override fun onNext(s: MyItem6?) {
-                runBlocking { delay(50) }
-                println("Subscriber received " + s!!)
-                if (s.id == 5) {//(3)
-                    println("Requesting two more")
-                    subscription.request(2)//(4)
-                }
-                if(s.id == 7) {
-                    println("Requesting 5 more")
-                    subscription.request(5)//(4)
-                }
-            }
+        override fun onNext(item: Int) {
+            println("Next $item")
+        }
 
-            override fun onError(e: Throwable) {
-                e.printStackTrace()
-            }
+        override fun onError(e: Throwable) {
+            println("Error Occured ${e.message}")
+        }
 
-            override fun onComplete() {
-                println("Done!")
-            }
-        })
-    runBlocking {
-        delay(10000)
+        override fun onSubscribe(d: Disposable) {
+            println("New Subscription ")
+        }
+    }//Create Observer
+    val observable: Observable<Int> = Observable.create<Int> {//1
+        for (i in 1..10) {
+            it.onNext(i)
+        }
+        it.onComplete()
     }
-}
-
-data class MyItem6(val id: Int) {
-    init {
-        println("MyItem Created $id")
-    }
+    observable.subscribe(observer)
 }
