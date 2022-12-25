@@ -1,25 +1,25 @@
 import io.reactivex.Observable
-import io.reactivex.functions.BiFunction
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import java.util.concurrent.TimeUnit
+import io.reactivex.rxkotlin.toObservable
 
 fun main(args: Array<String>) {
-    val observable1 =
-        Observable.interval(100, TimeUnit.MILLISECONDS)//(1)
-    val observable2 =
-        Observable.interval(250,TimeUnit.MILLISECONDS)//(2)
-    Observable.combineLatest(observable1,observable2
-    ) { t1: Long, t2: Long -> "t1: $t1, t2: $t2" }// (3)
-        .subscribe{
+    val observable1 = listOf("Kotlin", "Scala",
+        "Groovy").toObservable()
+    val observable2 = listOf("Python", "Java", "C++",
+        "C").toObservable()
+    Observable
+        .merge(observable1,observable2)//(1)
+        .subscribe {
             println("Received $it")
         }
-    runBlocking { delay(1100) }
 }
 
 /**
- * The combineLatest operator processes and emits the value as soon
- * as it gets an emit from any of its source producers by using the last emitted value for all
- * other source producers.
+ * The zipping operation will let you accumulate emissions, but what if you want to subscribe
+ * to each emission by all the source producers? Say you have two different producers and
+ * have the same set of actions to be applied when subscribing to them; there's no way to mix
+ * imperative programming and reactive programming and repeatedly subscribe to both of
+ * the producers separately with the same code. It'll also result in redundant code. So, what is
+ * the solution here? You got it right; merging all the emissions of all the source producers
+ * together and subscribing to them as a whole is the solution.
  *
  * */
