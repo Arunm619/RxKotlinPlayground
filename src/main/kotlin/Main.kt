@@ -1,22 +1,31 @@
-import io.reactivex.BackpressureStrategy
-import io.reactivex.Observable
+import io.reactivex.Flowable
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
 fun main() {
-    val source = Observable.range(1, 1000)
-    source.toFlowable(BackpressureStrategy.MISSING)//(1)
-        .onBackpressureLatest()
-        .map { MyItem12(it) }.observeOn(Schedulers.io()).subscribe {
-            print("Rec. $it;\n")
+    val flowable = Flowable.generate<Int> {
+        it.onNext(GenerateFlowableItem.item)
+    }//(1)
+    flowable.map { MyItemFlowable(it) }.observeOn(Schedulers.io()).subscribe {
             runBlocking { delay(100) }
-        }
-    runBlocking { delay(600000) }
+            println("Next $it")
+        }//(2)
+    runBlocking { delay(700000) }
 }
 
-data class MyItem12(val id: Int) {
+data class MyItemFlowable(val id: Int) {
     init {
-        print("MyItem init $id;\n")
+        println("MyItemFlowable Created $id")
     }
+}
+
+object GenerateFlowableItem {
+    //(3)
+    var item: Int = 0
+        //(4)
+        get() {
+            field += 1
+            return field//(5)
+        }
 }
