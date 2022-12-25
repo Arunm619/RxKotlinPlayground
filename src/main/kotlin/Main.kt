@@ -1,25 +1,24 @@
 import io.reactivex.Observable
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import java.util.concurrent.TimeUnit
 
 fun main(args: Array<String>) {
-    val observable1 = Observable.interval(500,
-        TimeUnit.MILLISECONDS).map { "Observable 1 $it" }//(1)
-    val observable2 = Observable.interval(100,
-        TimeUnit.MILLISECONDS).map { "Observable 2 $it" }//(2)
-    Observable
-        .amb(listOf(observable1,observable2))//(3)
-        .subscribe {
+    val observable = Observable.range(1,30)
+    observable.groupBy {//(1)
+        it%5
+    }.blockingSubscribe {
+        //An Observable that has been grouped by key, the value of which can be obtained with getKey().
+        // (2)
+        println("Key ${it.key} ")
+        it.subscribe {//(3)
             println("Received $it")
         }
-    runBlocking { delay(1500) }
+    }
 }
 
 /**
- * We can see from the output that the amb operator took the emissions from observable2
- * and didn't care about observable1, as the observable2 instance emitted first.
- * Just like other combination operators, amb also has ambArray and ambWith operator
- * variants.
+ * Grouping is a powerful operation that can be achieved using RxKotlin. This operation
+ * allows you to group emissions based on their property. Say, for example, you have an
+ * Observable / Flowable emitting integer numbers (Int), and, as per your business logic,
+ * you have some separate code for even and odd numbers and want to handle them
+ * separately. Grouping is the best solution in that scenario.
  *
  * */
