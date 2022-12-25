@@ -5,18 +5,17 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 
 fun main() {
-    val source = Observable.range(1, 641)
+    val source = Observable.range(1, 1000)
     source.toFlowable(BackpressureStrategy.MISSING)//(1)
-        .onBackpressureBuffer()//(2)
-        .map { MyItem11(it) }
-        .observeOn(Schedulers.io())
-        .subscribe{
+        .onBackpressureBuffer(20)//(2)
+        .map { MyItem11(it) }.observeOn(Schedulers.io()).subscribe {
             println(it)
-            runBlocking { delay(10) }
+            runBlocking { delay(100) }
         }
     runBlocking { delay(600000) }
 }
-data class MyItem11 (val id:Int) {
+
+data class MyItem11(val id: Int) {
     init {
         println("MyItem Created $id")
     }
