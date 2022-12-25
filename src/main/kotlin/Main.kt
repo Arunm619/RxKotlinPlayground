@@ -1,12 +1,11 @@
 import io.reactivex.Flowable
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import java.util.concurrent.TimeUnit
 
 fun main() {
-    val flowable = Flowable.range(1, 111)//(1)
-    flowable.window(10)
-        .subscribe { flo ->
-            flo.subscribe {//(2)
-                print("$it, ")
-            }
-            println()
-        }
+    val flowable = Flowable.interval(100, TimeUnit.MILLISECONDS)//(1)
+    flowable.throttleFirst(200, TimeUnit.MILLISECONDS)//(2)
+        .subscribe { println(it) }
+    runBlocking { delay(10000) }
 }
