@@ -1,17 +1,40 @@
 import io.reactivex.rxkotlin.toObservable
 
-fun main(args: Array<String>) {
-    val observable = listOf(10, 9, 8, 7, 6, 5, 4, 3, 2, 1).toObservable()
-    observable.map {//(1)
-            number ->
-        "Transforming Int to String $number"
-    }.subscribe { item ->
-        println("Received $item")
+fun main() {
+    val list = listOf<MyItemInherit>(
+        MyItemInherit(1),
+        MyItemInherit(2),
+        MyItemInherit(3),
+        MyItemInherit(4),
+        MyItemInherit(5),
+        MyItemInherit(6),
+        MyItemInherit(7),
+        MyItemInherit(8),
+        MyItemInherit(9),
+        MyItemInherit(10)
+    )//(1)
+    list.toObservable()//(2)
+        .map { it as MyItem}//(3)
+        .subscribe {
+            println(it)
+        }
+    println("cast")
+    list.toObservable().cast(MyItem::class.java)//(4)
+        .subscribe {
+            println(it)
+        }
+}
+
+open class MyItem(val id: Int) {
+    //(5)
+    override fun toString(): String {
+        return "[MyItem $id]"
     }
 }
 
-/*
-We have already seen a little use of the map operator. For a given
-Observable<T> or Flowable<T>, the map operator will transform an emitted item of type
-T into an emission of type R by applying the provided lambda of Function<T,R> to it.
-*/
+class MyItemInherit(id: Int) : MyItem(id) {
+    //(6)
+    override fun toString(): String {
+        return "[MyItemInherit $id]"
+    }
+}
