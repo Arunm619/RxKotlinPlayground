@@ -1,30 +1,23 @@
 import io.reactivex.Observable
-import io.reactivex.Observer
-import io.reactivex.disposables.Disposable
 
 fun main() {
-    val observable = Observable.range(1,20)
-    observable
-        .takeLast(10)
-        .subscribe(object: Observer<Int> {
-            override fun onError(e: Throwable) {
-                println("Error $e")
-            }
-            override fun onComplete() {
-                println("Complete")
-            }
-            override fun onNext(t: Int) {
-                println("Received $t")
-            }
-            override fun onSubscribe(d: Disposable) {
-                println("starting")
-            }
-        })
+    Observable
+        .just(1, 2, 3, 4, 5)
+        .map { it / (3 - it) }
+        .subscribe {
+            println("Received $it")
+        }
 }
 
 /**
- * In the exact opposite way than the skip operator, the take
- * operator passes the specified emissions to downstream, discarding the remaining ones.
- * Most importantly, it also sends onComplete notifications to downstream on its own, as
- * soon as it completes passing all the specified emissions.
+ *
+ * As expected, the program threw an error and that is a bad thing if that occurs on the user
+ * end. So, let's take a look at how we can handle errors in a reactive way. RxKotlin provides
+ * us with a few operators for error handling, which we'll take a look at. We will use the
+ * previous program and apply various error handling operators to them to understand them
+ * better
+ *
+ *
+ * The exception was not handled due to missing onError handler in the subscribe() method call.
+ * Always add the onError handler.
  * */
