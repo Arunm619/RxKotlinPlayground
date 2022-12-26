@@ -17,6 +17,10 @@ dependencies {
     implementation("io.reactivex.rxjava2:rxkotlin:2.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4")
     implementation("com.netflix.rxjava:rxjava-apache-http:0.20.7")
+    testImplementation("org.testng:testng:7.1.0")
+    compileOnly("junit:junit:4.12")
+    compileOnly("org.mockito:mockito-core:1.9.5")
+    compileOnly("org.jetbrains.kotlin:kotlin-test-junit:1.6.21")
 }
 
 tasks.test {
