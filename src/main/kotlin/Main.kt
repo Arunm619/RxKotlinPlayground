@@ -1,32 +1,30 @@
 import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
+import io.reactivex.ObservableSource
+import io.reactivex.annotations.NonNull
 
-fun main() {
-    Observable.range(1, 10)
-        .map {
-            println("map - ${Thread.currentThread().name} $it")
-            it
-        }
-        .subscribeOn(Schedulers.computation())
-        .observeOn(Schedulers.io())
-        .subscribe {
-            println("onNext - ${Thread.currentThread().name} $it")
-        }
-    runBlocking { delay(100) }
+/**
+ * RxKotlin provides the Transformer interfaces (ObservableTransformer and
+ * FlowableTransformer are two Transformer interfaces) for that purpose. Just like the
+ * operator interfaces, it has only one method—apply. The only difference is that here,
+ * instead of Observers, you have the Observable. So, instead of operating on individual
+ * emits and their items, here, you work directly on the source.
+ * */
+
+interface ObservableTransformer<Upstream, Downstream> {
+    /**
+     * Applies a function to the upstream Observable
+    and returns an ObservableSource with
+     * optionally different element type.
+     * @param upstream the upstream Observable instance
+     * @return the transformed ObservableSource instance
+     */
+    @NonNull
+    fun apply(@NonNull upstream: Observable<Upstream>):
+            ObservableSource<Downstream>
 }
 
 /**
- * Need for composing operators with transformers:
- *
- * think of a situation when you want to create a new operator by combining multiple operators. For instance, I often
- * wanted to combine the functionality of the subscribeOn and observeOn operators so that
- * all the computations can be pushed to computation threads, and, when the results are
- * ready, we can receive them on the main thread.
- *
- * Now, say we have this combination of the subscribeOn and observeOn operator
- * throughout our project, so we want a shortcut. We want to create our own operator where
- * we would pass the two Scheduler's where we want subscribeOn and observeOn, and
- * everything should work perfectly.
+ * The interface signature is almost the same. Unlike the apply method of
+ * ObservableOperator, here, the apply method receives Upstream Observable and
+ * should return the Observable that should be passed to the Downstream.
  * */
