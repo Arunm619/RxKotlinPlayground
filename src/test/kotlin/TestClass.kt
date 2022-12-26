@@ -18,4 +18,13 @@ class TestClass {
      * filter for even numbers only and then within the blockingForEach we are testing whether
      * all the received numbers are even.
      * */
+
+    /**
+     * However, using blocking code does no good in production. While it seems that using
+     * blocking code for testing is ok, but it is actually not. It can do significant harm to keep you
+     * from the benefits of testing. How? Just think of multiple Observables/Flowables are
+     * emitting concurrently for your application, if you put them on the blocking code their
+     * complete behavior may change and as a result you'll be deprived from the benefits of unit
+     * testing.
+     * */
 }
