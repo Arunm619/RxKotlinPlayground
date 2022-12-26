@@ -1,61 +1,13 @@
-import io.reactivex.Observable
-import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-import kotlin.time.ExperimentalTime
-import kotlin.time.measureTime
-
-@OptIn(ExperimentalTime::class)
-fun main(args: Array<String>) {
-    var time = measureTime {
-        Observable.range(1,10)
-            .subscribe {
-                runBlocking { delay(200) }
-                println("Observable1 Item Received $it")
-            }
-        Observable.range(21,10)
-            .subscribe {
-                runBlocking { delay(100) }
-                println("Observable2 Item Received $it")
-            }
-    }
-    println(time.inWholeMilliseconds)
-    println("---------------------")
-
-     time = measureTime {
-        Observable.range(1,10)
-            .subscribeOn(Schedulers.computation())
-            .subscribe {
-                runBlocking { delay(200) }
-                println("Observable1 Item Received $it")
-            }
-        Observable.range(21,10)
-            .subscribeOn(Schedulers.computation())
-            .subscribe {
-                runBlocking { delay(100) }
-                println("Observable2 Item Received $it")
-            }
-         runBlocking { delay(2100) }//(3)
-    }
-    println(time.inWholeMilliseconds)
-}
-
 /**
- * Time taken is 3161ms
- * The total execution time of this program would be around 3,100 milliseconds (as the delay
- * is performed before printing), while the thread pool was sitting idle in between. Using
- * scheduler, this time can be significantly reduced
- *
- *
- * ----------
- *
- * Observable in this example is emitted concurrently. The line of the
- * subscribeOn(Schedulers.computation()) code enabled both downstreams to
- * subscribe to the Observable in a different (background) thread, which influenced
- * concurrency. You should already be used to it with using it runBlocking { delay(2100)
- * } on comment (3); we use it to keep the program alive. As all the operations are being
- * performed in different threads, we need to block the main thread to keep the program alive.
- * However, notice the time duration of the delay we passed; it's only 2,100 milliseconds, and
- * the output confirms both the subscriptions processed all the emissions. So, it's clear, we
- * saved 1,000 milliseconds right away.
+ * Schedulers.io() provides us with I/O bound threads. To be more accurate,
+ * Schedulers.io() provides you with ThreadPool, which can create an unbounded
+ * number of worker threads that are meant to be performing I/O bounded tasks.
+ * Now, what exactly does the I/O bounded thread mean? And why are we calling it I/O
+ * bounded? Let's inspect.
+ * All the threads in this pool are blocking and are meant to perform more I/O operations than
+ * computationally intense tasks, giving less load to CPUs, but may take longer due to waiting
+ * for I/O. By I/O operations, we mean interactions with file systems, databases, services, or
+ * I/O devices.
+ * We should be cautious about using this scheduler as it can create an infinite number of
+ * threads (until the memory lasts) and can cause OutOfMemory errors.
  * */
