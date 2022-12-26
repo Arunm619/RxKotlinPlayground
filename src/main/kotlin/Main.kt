@@ -3,14 +3,10 @@
  * each task provided. While at first glance it may seem similar to Schedulers.io(), there's
  * actually a huge difference.
  *
- * The Schedulers.io() uses a thread pool, and whenever it gets a new unit of work, it first
- * looks into the thread pool to see if any idle thread is available to take up the task; it
- * proceeds to create a new thread if no pre-existing thread is available to take up the work.
- * However, Schedulers.newThread() doesn't even use a thread pool; instead, it creates a
- * new thread for every request and forgets them forever.
- *
- * In most of the cases, when you're not using Schedulers.computation(), you should
- * consider Schedulers.io() and should predominantly avoid using
- * Schedulers.newThread(); threads are very expensive resources, you should try to avoid
- * the creation of new threads as much as possible.
+ * The Schedulers.single() provides us with a scheduler that contains only one thread
+ * and returns the single instance for every call. Confused? Let's make it clear. Think of a
+ * situation where you need to execute tasks that are strongly
+ * sequential—Schedulers.single() is the best available option for you here. As it
+ * provides you with only one thread, every task that you enqueue here is bound to be
+ * executed sequentially
  * */
