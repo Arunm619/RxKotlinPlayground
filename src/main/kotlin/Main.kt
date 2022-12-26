@@ -6,13 +6,28 @@ import kotlinx.coroutines.runBlocking
 import java.util.concurrent.TimeUnit
 
 fun main() {
-    val observable1 = Observable.interval(100, TimeUnit.MILLISECONDS)
-    val observable2 =
-        Observable.timer(500,TimeUnit.MILLISECONDS)//(1)
+    val observable1 = Observable.range(1,20)
     observable1
-        .skipUntil(observable2)//(2)
+        .take(5)//(1)
+        .subscribe(object: Observer<Int> {
+            override fun onError(e: Throwable) {
+                println("Error $e")
+            }
+            override fun onComplete() {
+                println("onComplete")
+            }
+            override fun onNext(t: Int) {
+                println("Received $t")
+            }
+            override fun onSubscribe(d: Disposable) {
+                println("starting skip(count)")
+            }
+        })
+    val observable2 = Observable.interval(100, TimeUnit.MILLISECONDS)
+    observable2
+        .take(400,TimeUnit.MILLISECONDS)//(2)
         .subscribe(
-            object: Observer<Long> {
+            object:Observer<Long> {
                 override fun onError(e: Throwable) {
                     println("Error $e")
                 }
@@ -27,12 +42,14 @@ fun main() {
                 }
             }
         )
-    runBlocking { delay(1500) }
+    runBlocking {
+        delay(1000)
+    }
 }
 
 /**
- *  we used that Observable instance (observable2) as the parameter to the skipUntil
- * operator, which will make it discard all the emissions of observable1 until observable2
- * emits.
- *
+ * In the exact opposite way than the skip operator, the take
+ * operator passes the specified emissions to downstream, discarding the remaining ones.
+ * Most importantly, it also sends onComplete notifications to downstream on its own, as
+ * soon as it completes passing all the specified emissions.
  * */
