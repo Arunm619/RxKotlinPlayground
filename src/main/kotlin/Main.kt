@@ -1,5 +1,7 @@
+import io.reactivex.ObservableOperator
 import io.reactivex.Observer
-import io.reactivex.annotations.NonNull
+import io.reactivex.disposables.Disposable
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Requirements of customer operator
@@ -12,27 +14,49 @@ import io.reactivex.annotations.NonNull
  * operators.
  * */
 
-/**
- * The preceding points are our basic requirements; and, as per the preceding requirement, we
- * must use AtomicInteger for the counter (which will count the emissions, and we will pass
- * that count as a sequential number) so that the operator will work seamlessly with any
- * Scheduler.
- * */
-
-/*
-Every custom operator should implement the ObservableOperator interface, which looks
-like this:
-
-*/
-interface ObservableOperator<Downstream, Upstream> {
-    /**
-     * Applies a function to the child Observer and returns a new
-    parent Observer.
-     * @param observer the child Observer instance
-     * @return the parent Observer instance
-     * @throws Exception on failure
-     */
-    @NonNull
-    @Throws(Exception::class)
-    fun apply(@NonNull observer: Observer<in Downstream>): Observer<in Upstream>
+class AddSerialNumber<T> : ObservableOperator<Pair<Int, T>, T> {
+    val counter: AtomicInteger = AtomicInteger()
+    override fun apply(observer: Observer<in Pair<Int, T>>): Observer<in T> {
+        return object : Observer<T> {
+            override fun onComplete() {
+                observer.onComplete()
+            }
+            override fun onSubscribe(d: Disposable) {
+                observer.onSubscribe(d)
+            }
+            override fun onError(e: Throwable) {
+                observer.onError(e)
+            }
+            override fun onNext(t: T) {
+                observer.onNext(Pair(counter.incrementAndGet(), t))
+            }
+        }
+    }
 }
+
+/**
+ * Let's start describing this from the very first feature—the definition of the
+ * AddSerialNumber class.
+ * This implements the ObservableOperator interface. As per our
+ * requirement, we kept the class generic, that is, we specified the Upstream type to be generic T.
+ *
+ * We used an AtomicInteger as a val property of the class, which should be initialized
+ * within the init block (as we are declaring and defining the property within the class, it
+ * would be automatically initialized within init while creating instances of the class).
+ *
+ * That AtomicInteger, counter should increment on each emission and should return the
+ * emitted value as the serial number of the emission.
+ *
+ * Inside the apply method, we created and returned an Observer instance, which would be
+ * used to listen to the upstream as described earlier.
+ *
+ * Basically, every operator passes an Observer to upstream by which it should receive the events.
+ *
+ * Inside that observer, whenever we receive any event, we echoed that to the Observer
+ * downstream (where it is received as a parameter).
+ *
+ * Inside the onNext event of the Upstream Observer, we incremented the counter, added
+ * it as the first element to a Pair instance, added the item we received (as a parameter in
+ * onNext) as the second value, and, finally, passed it to the
+ * onNext—observer.onNext(Pair(counter.incrementAndGet(),t)) downstream
+ * */
