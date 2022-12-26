@@ -1,33 +1,31 @@
-import io.reactivex.Observable
-import io.reactivex.rxkotlin.subscribeBy
+import org.apache.http.impl.nio.client.HttpAsyncClients
+import rx.apache.http.ObservableHttp
 
-fun main(args: Array<String>) {
-    Observable.just(1,2,3,4,5)
-        .map { it/(3-it) }
-        .retry(3)//(1)
-        .subscribeBy (
-            onNext = {println("Received $it")},
-            onError = {println("Error")}
-        )
-    println("\n With Predicate \n")
-    var retryCount = 0
-    Observable.just(1,2,3,4,5)
-        .map { it/(3-it) }
-        .retry {//(2)
-                _, _->
-            (++retryCount)<3
+fun main() {
+    val httpClient = HttpAsyncClients.createDefault()//(1)
+    httpClient.start()//(2)
+    val URL = "https://dummyjson.com/products"
+    ObservableHttp.createGet(
+        URL, httpClient
+    ).toObservable()//(3)
+        .flatMap { response ->
+            response.content.map { bytes ->
+                String(bytes)
+            }//(4)
+        }.onErrorReturn {//(5)
+            "Error Parsing data "
+        }.subscribe {
+            println(it)//(6)
+            httpClient.close()//(7)
         }
-        .subscribeBy (
-            onNext = {println("Received $it")},
-            onError = {println("Error")}
-        )
 }
+
 /**
- * The retry operator is another error handling operator that enables you to retry/resubscribe to the same producer when an error occurs. You just need to provide a predicate
- * or retry-limit when it should stop retrying.
- *
- * we used the retry operator with a retry limit, and on comment (2), we
- * used the retry operator with a predicate. The retry operator will keep retrying until the
- * predicate returns true and will pass the error to downstream whenever the predicate
- * returns false.
+ * In this program, we used HttpAsyncClients.createDefault() to get an instance of
+ * CloseableHttpAsyncClient. Before starting an HTTP request, we first need to start the
+ * client. We did this in the code on comment (2), with httpClient.start(). On comment
+ * (3), we created a GET request and converted it to an observable of type
+ * ObservableHttpResponse, so we used the flatMap operator to get access to the content
+ * of the response. Inside the flatMap operator, we used the map operator to convert the byte
+ * response into a String on comment (4).
  * */
