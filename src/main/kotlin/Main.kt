@@ -1,41 +1,22 @@
-import io.reactivex.rxkotlin.toObservable
-import io.reactivex.schedulers.Schedulers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
-
-fun main() {
-    listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
-        .toObservable()
-        .observeOn(Schedulers.computation())
-        .map { item ->
-            println("Mapping $item ${Thread.currentThread().name}")
-            return@map item.toInt()
-        }
-        .observeOn(Schedulers.io())
-        .subscribe { item ->
-            println("Received $item${Thread.currentThread().name}")
-        }
-    runBlocking {
-        delay(1000)
-    }
-}
 /**
- * While subscribeOn looks like an awesome gift from heaven, it may not be suited in some
- * cases. For example, you may want to do computations on the computation threads and
- * display the results from the io threads, which actually you should do.
+ * Unit testing is a level of software testing where the
+ * individual smallest testable components of a software (aka application), called units are
+ * tested. The purpose is to validate that each unit of the software performs as it was supposed
+ * to.
  *
- * The subscribeOn operator requires a companion for all these things; while it'll specify the thread for the
- * entire subscription, it requires its companion to specify threads for specific operators.
+ * Unit tests can be done manually, but they are often automated. The sole purpose of
+ * automated unit testing is to reduce human error and eliminate any extra bugs/errors caused
+ * by them.
+ * To explain let's first remember the proverb:
+ * >>>>>>>To err is human<<<<<<<<
  *
- * The perfect companion to the subscribeOn operator is the observeOn operator. The
- * observeOn operator specifies the scheduler for all the operators called after it.
+ * So, if we do the unit tests manually, the chances of additional errors or bugs will rise.
+ * Automated unit tests can eliminate this risk as they include minimal human effort
  *
- *
- * So, what did we do? We specified the computation threads for the map operator by calling
- * observeOn(Schedulers.computation()) just before it, and called
- * observeOn(Schedulers.io()) before subscribe to switch to io threads to receive the
- * results.
- * In this program, we did a context switch; we exchanged data with threads and
- * implemented communication in between threads with such an ease, with merely 7-8 lines of
- * code—that's the abstraction schedulers provides us with.
+ *  we should write
+ * unit tests for each and every functional section of our applications
+ * By functional section we mean each section that performs any small
+ * operation and/or function. We can skip testing a POJO class with just
+ * getters and setters, but we must test the code which uses that POJO class
+ * to accomplish something.
  * */
