@@ -1,46 +1,32 @@
-import io.reactivex.Observer
-import io.reactivex.disposables.Disposable
-import io.reactivex.rxkotlin.subscribeBy
-import io.reactivex.rxkotlin.toObservable
-import java.util.concurrent.atomic.AtomicInteger
+import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 
-fun main(args: Array<String>) {
-    listOf(
-        "Reactive", "Programming", "in", "Kotlin",
-        "by Rivu Chakraborty", "Packt"
-    )
-        .toObservable()
-        .lift<Pair<Int, String>> { observer ->
-            val counter = AtomicInteger()
-            object : Observer<String> {
-                override fun onSubscribe(d: Disposable) {
-                    observer.onSubscribe(d)
-                }
-                override fun onNext(t: String) {
-                    observer.onNext(Pair(counter.incrementAndGet(), t))
-                }
-                override fun onComplete() {
-                    observer.onComplete()
-                }
-                override fun onError(e: Throwable) {
-                    observer.onError(e)
-                }
-            }
+fun main() {
+    Observable.range(1, 10)
+        .map {
+            println("map - ${Thread.currentThread().name} $it")
+            it
         }
-        .subscribeBy(
-            onNext = {
-                println("Next $it")
-            },
-            onError = {
-                it.printStackTrace()
-            },
-            onComplete = {
-                println("Completed")
-            }
-        )
+        .subscribeOn(Schedulers.computation())
+        .observeOn(Schedulers.io())
+        .subscribe {
+            println("onNext - ${Thread.currentThread().name} $it")
+        }
+    runBlocking { delay(100) }
 }
 
 /**
- * The program is almost similar to the previous one, except that we used a lambda and used
- * Pair<Int,String> as the type of downstream Observer.
+ * Need for composing operators with transformers:
+ *
+ * think of a situation when you want to create a new operator by combining multiple operators. For instance, I often
+ * wanted to combine the functionality of the subscribeOn and observeOn operators so that
+ * all the computations can be pushed to computation threads, and, when the results are
+ * ready, we can receive them on the main thread.
+ *
+ * Now, say we have this combination of the subscribeOn and observeOn operator
+ * throughout our project, so we want a shortcut. We want to create our own operator where
+ * we would pass the two Scheduler's where we want subscribeOn and observeOn, and
+ * everything should work perfectly.
  * */
