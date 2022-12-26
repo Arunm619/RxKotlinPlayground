@@ -1,25 +1,21 @@
-import io.reactivex.Maybe
-import io.reactivex.Observable
-import io.reactivex.Single
 import io.reactivex.rxkotlin.toObservable
-import io.reactivex.schedulers.Schedulers
 import org.junit.jupiter.api.Test
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class TestClass {
     @Test
-    fun `test with blockingIterable`() {
-        val list = listOf(2,10,5,6,9,8,7,1,4,3)
+    fun `test with blockingForEach`() {
+        val list =
+            listOf(2, 10, 5, 6, 9, 8, 7, 1, 4, 3, 12, 20, 15, 16, 19, 18, 17, 11, 14, 13)
         val observable = list.toObservable()
-            .sorted()
-        val iterable = observable.blockingIterable()
-        assertEquals(list.sorted(),iterable.toList())
+            .filter { item -> item % 2 == 0 }
+        observable.blockingForEach { item ->
+            assertTrue { item % 2 == 0 }
+        }
     }
     /**
-     * The blockingIterable operator works in an interesting way, it passes an emission to the
-     * Iterable, then the Iterable will keep blocking the iterating thread until the next
-     * emission is available. This operator queues up unconsumed values until the Iterator can
-     * consume them, and this can cause OutOfMemory exceptions.
+     * we created an Observable from a list of Int. Then applied a
+     * filter for even numbers only and then within the blockingForEach we are testing whether
+     * all the received numbers are even.
      * */
 }
