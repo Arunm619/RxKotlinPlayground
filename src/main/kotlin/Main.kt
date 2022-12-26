@@ -1,25 +1,32 @@
 /**
-The definition of concurrency can be described as follows:
-As a programming paradigm, concurrent computing is a form of modular programming,
-namely factoring an overall computation into subcomputations that may be executed
-concurrently.
-– Wikipedia
-As the definition says, concurrency is all about breaking the entire task into small parts and
-then executing them concurrently (there's a small difference between concurrent execution
-and parallel execution, which we will discuss shortly).
-So, what does it mean to execute subcomputations concurrently? Let's look at a real-life
-example. Think of a situation where you're cooking a new dish at your home and you have
-three chores—bring the spices, cut the vegetables, and also marinate something. Now, if
-you're doing it all alone, you have to do them one by one, but if you have a family member
-at your disposal, then you can distribute the tasks between the two of you. You can cut the
-vegetables while the other person is bringing the spices, and whoever between you two
-completes early can continue on the third task—marinating the food.
-You can think of you and the family member (who helped you) as two threads, or, to be
-more specific, you're the main thread of the program (here, cooking) as you're the
-responsible person for the entire job, and you'll be distributing tasks between you and the
-family member, who is a worker thread. Together, you and your family member form a
-thread pool.
-The entire program will execute faster if there are more threads and the complete task is
-divided properly among them.
- *
- * */
+* So, whenever you subscribe to an Observable and/or Flowable, the current thread is
+blocked until all the items are emitted and received by the Observer chain (except for the
+cases with interval and timer factory methods). Surprising, right? However, it's actually
+good, because, for an Observable chain, if a separate thread is assigned to each operator
+(any operator generally subscribes to the source Observable and performs operations on the
+emissions, the next operator subscribes to the emissions by the current one), then it would
+be totally messy.
+To resolve this scenario, ReactiveX provided us with scheduler and scheduling operators.
+By using them, thread management becomes easy, as the synchronization is almost
+automatic and there's no shared data between threads (as a basic property of functional
+programming, thus functional reactive programming).
+Now that we have got some hands on the ideas behind concurrency, we can move forward
+with implementing concurrency using RxKotlin.
+*
+* In ReactiveX, the heart of concurrency lies in schedulers. As I have already mentioned, by
+default, the Observable and the chain of operators applied to it will do the work on the
+same thread where subscribe is called, and the thread will be blocked until Observer
+receives the onComplete or onError notification. We can use schedulers to change this
+behavior.
+
+Types of scheduler
+As an abstraction layer for thread pool management, the scheduler API provides you with
+some pre-composed scheduler. It also allows you to create a new user-defined scheduler.
+Let's take a look at the available scheduler types:
+Schedulers.io()
+Schedulers.computation()
+Schedulers.newThread()
+Schedulers.single()
+Schedulers.trampoline()
+Schedulers.from()
+* */
