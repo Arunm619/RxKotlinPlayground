@@ -5,7 +5,7 @@ import io.reactivex.disposables.Disposable
 fun main() {
     val observable = Observable.range(1,20)
     observable
-        .takeWhile{item->item<10}//(1)
+        .takeLast(10)
         .subscribe(object: Observer<Int> {
             override fun onError(e: Throwable) {
                 println("Error $e")
@@ -17,7 +17,7 @@ fun main() {
                 println("Received $t")
             }
             override fun onSubscribe(d: Disposable) {
-                println("starting skipWhile")
+                println("starting")
             }
         })
 }
