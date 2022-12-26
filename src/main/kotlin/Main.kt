@@ -1,55 +1,38 @@
-import io.reactivex.Observable
-import java.io.Closeable
-
-//Resource management
+import io.reactivex.Observer
+import io.reactivex.annotations.NonNull
 
 /**
+ * Requirements of customer operator
  *
- * So, what is resource? When developing applications, you may often need to access an API
- * (through an HTTP connection), access a database, read from/write to a file, or you may even
- * need to access any I/O ports/sockets/devices. All these things are considered resources in
- * general.
- * Why do we need to manage/close them? Whenever we are accessing a resource, especially
- * to write, the system often locks it for us, and blocks its access to any other program. If you
- * don't release or close a resource when you're done, system performance may degrade and
- * there may even be a deadlock. Even if the system doesn't lock the resource for us, it w
+ * 1. The operator should emit a pair, with an added sequential number as the first
+ * element. The second element of the pair should be the actual emission.
+ *
+ * 2. The operator should be generic and should work with any type of Observable.
+ * 3. As with other operators, the operator should work concurrently with other
+ * operators.
  * */
 
-class Resource : Closeable {
-    init {
-        println("Resource Created")
-    }
-
-    val data: String = "Hello World"
-    override fun close() {
-        println("Resource Closed")
-    }
-}
-
-fun main() {
-    Observable.using({//(1) resourceSupplier
-        Resource()
-    }, {//(2) sourceSupplier
-            resource: Resource ->
-        Observable.just(resource)
-    }, {//(3) disposer
-            resource: Resource ->
-        resource.close()
-    }).subscribe { resource ->
-        println("Resource Data ${resource.data}")
-    }
-}
 /**
- * we passed three lambdas to the using operator.
- * In the first lambda (comment one), we created an instance of Resource and returned it (in a lambda,
- * the last statement works as return, you don't have to write it).
- *
- * The second lambda will take resource as parameter and will create the Observable from
- * it to return.
- *
- * The third lambda will again take resource as a parameter and close it.
- *
- * The using operator will return the Observable you created in the second lambda for you
- * to apply the RxKotlin chain to it.
- *
+ * The preceding points are our basic requirements; and, as per the preceding requirement, we
+ * must use AtomicInteger for the counter (which will count the emissions, and we will pass
+ * that count as a sequential number) so that the operator will work seamlessly with any
+ * Scheduler.
  * */
+
+/*
+Every custom operator should implement the ObservableOperator interface, which looks
+like this:
+
+*/
+interface ObservableOperator<Downstream, Upstream> {
+    /**
+     * Applies a function to the child Observer and returns a new
+    parent Observer.
+     * @param observer the child Observer instance
+     * @return the parent Observer instance
+     * @throws Exception on failure
+     */
+    @NonNull
+    @Throws(Exception::class)
+    fun apply(@NonNull observer: Observer<in Downstream>): Observer<in Upstream>
+}
