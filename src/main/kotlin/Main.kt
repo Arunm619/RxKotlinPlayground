@@ -1,32 +1,61 @@
-/**
-* So, whenever you subscribe to an Observable and/or Flowable, the current thread is
-blocked until all the items are emitted and received by the Observer chain (except for the
-cases with interval and timer factory methods). Surprising, right? However, it's actually
-good, because, for an Observable chain, if a separate thread is assigned to each operator
-(any operator generally subscribes to the source Observable and performs operations on the
-emissions, the next operator subscribes to the emissions by the current one), then it would
-be totally messy.
-To resolve this scenario, ReactiveX provided us with scheduler and scheduling operators.
-By using them, thread management becomes easy, as the synchronization is almost
-automatic and there's no shared data between threads (as a basic property of functional
-programming, thus functional reactive programming).
-Now that we have got some hands on the ideas behind concurrency, we can move forward
-with implementing concurrency using RxKotlin.
-*
-* In ReactiveX, the heart of concurrency lies in schedulers. As I have already mentioned, by
-default, the Observable and the chain of operators applied to it will do the work on the
-same thread where subscribe is called, and the thread will be blocked until Observer
-receives the onComplete or onError notification. We can use schedulers to change this
-behavior.
+import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTime
 
-Types of scheduler
-As an abstraction layer for thread pool management, the scheduler API provides you with
-some pre-composed scheduler. It also allows you to create a new user-defined scheduler.
-Let's take a look at the available scheduler types:
-Schedulers.io()
-Schedulers.computation()
-Schedulers.newThread()
-Schedulers.single()
-Schedulers.trampoline()
-Schedulers.from()
-* */
+@OptIn(ExperimentalTime::class)
+fun main(args: Array<String>) {
+    var time = measureTime {
+        Observable.range(1,10)
+            .subscribe {
+                runBlocking { delay(200) }
+                println("Observable1 Item Received $it")
+            }
+        Observable.range(21,10)
+            .subscribe {
+                runBlocking { delay(100) }
+                println("Observable2 Item Received $it")
+            }
+    }
+    println(time.inWholeMilliseconds)
+    println("---------------------")
+
+     time = measureTime {
+        Observable.range(1,10)
+            .subscribeOn(Schedulers.computation())
+            .subscribe {
+                runBlocking { delay(200) }
+                println("Observable1 Item Received $it")
+            }
+        Observable.range(21,10)
+            .subscribeOn(Schedulers.computation())
+            .subscribe {
+                runBlocking { delay(100) }
+                println("Observable2 Item Received $it")
+            }
+         runBlocking { delay(2100) }//(3)
+    }
+    println(time.inWholeMilliseconds)
+}
+
+/**
+ * Time taken is 3161ms
+ * The total execution time of this program would be around 3,100 milliseconds (as the delay
+ * is performed before printing), while the thread pool was sitting idle in between. Using
+ * scheduler, this time can be significantly reduced
+ *
+ *
+ * ----------
+ *
+ * Observable in this example is emitted concurrently. The line of the
+ * subscribeOn(Schedulers.computation()) code enabled both downstreams to
+ * subscribe to the Observable in a different (background) thread, which influenced
+ * concurrency. You should already be used to it with using it runBlocking { delay(2100)
+ * } on comment (3); we use it to keep the program alive. As all the operations are being
+ * performed in different threads, we need to block the main thread to keep the program alive.
+ * However, notice the time duration of the delay we passed; it's only 2,100 milliseconds, and
+ * the output confirms both the subscriptions processed all the emissions. So, it's clear, we
+ * saved 1,000 milliseconds right away.
+ * */
