@@ -1,3 +1,5 @@
+import java.io.Closeable
+
 //Resource management
 
 /**
@@ -11,3 +13,14 @@
  * don't release or close a resource when you're done, system performance may degrade and
  * there may even be a deadlock. Even if the system doesn't lock the resource for us, it w
  * */
+
+class Resource : Closeable {
+    init {
+        println("Resource Created")
+    }
+
+    val data: String = "Hello World"
+    override fun close() {
+        println("Resource Closed")
+    }
+}
