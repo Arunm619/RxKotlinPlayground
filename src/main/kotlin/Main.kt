@@ -1,13 +1,15 @@
 /**
- * Schedulers.io() provides us with I/O bound threads. To be more accurate,
- * Schedulers.io() provides you with ThreadPool, which can create an unbounded
- * number of worker threads that are meant to be performing I/O bounded tasks.
- * Now, what exactly does the I/O bounded thread mean? And why are we calling it I/O
- * bounded? Let's inspect.
- * All the threads in this pool are blocking and are meant to perform more I/O operations than
- * computationally intense tasks, giving less load to CPUs, but may take longer due to waiting
- * for I/O. By I/O operations, we mean interactions with file systems, databases, services, or
- * I/O devices.
- * We should be cautious about using this scheduler as it can create an infinite number of
- * threads (until the memory lasts) and can cause OutOfMemory errors.
+ * The Schedulers.computation() is probably the most useful scheduler for programmers.
+ * It provides us with a bounded thread-pool, which can contain a number of threads equal to
+ * the number of available CPU cores. As the name suggests, this scheduler is meant for CPU
+ * intense works.
+ * We should use this scheduler only for CPU—intense tasks and not for any other cause. The
+ * reason is that the threads in this scheduler keeps the CPU cores busy, and may slow down
+ * the entire application if it is used for I/O bound or any other tasks that involves noncomputational tasks.
+ * The main reason why we should consider Schedulers.io() for I/O bound tasks and
+ * Schedulers.computation() for computational purposes is that computation() threads
+ * utilize the processors better and create no more threads than the available CPU cores, and
+ * reuses them. While Schedulers.io() is unbounded, and if you schedule 10,000
+ * computational tasks on io() in parallel, then each of those 10,000 tasks each have their own
+ * thread and be competing for CPU incurring context switching costs.
  * */
