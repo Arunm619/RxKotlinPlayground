@@ -1,15 +1,16 @@
 /**
- * The Schedulers.computation() is probably the most useful scheduler for programmers.
- * It provides us with a bounded thread-pool, which can contain a number of threads equal to
- * the number of available CPU cores. As the name suggests, this scheduler is meant for CPU
- * intense works.
- * We should use this scheduler only for CPU—intense tasks and not for any other cause. The
- * reason is that the threads in this scheduler keeps the CPU cores busy, and may slow down
- * the entire application if it is used for I/O bound or any other tasks that involves noncomputational tasks.
- * The main reason why we should consider Schedulers.io() for I/O bound tasks and
- * Schedulers.computation() for computational purposes is that computation() threads
- * utilize the processors better and create no more threads than the available CPU cores, and
- * reuses them. While Schedulers.io() is unbounded, and if you schedule 10,000
- * computational tasks on io() in parallel, then each of those 10,000 tasks each have their own
- * thread and be competing for CPU incurring context switching costs.
+ * The Schedulers.newThread() provides us with a scheduler that creates a new thread for
+ * each task provided. While at first glance it may seem similar to Schedulers.io(), there's
+ * actually a huge difference.
+ *
+ * The Schedulers.io() uses a thread pool, and whenever it gets a new unit of work, it first
+ * looks into the thread pool to see if any idle thread is available to take up the task; it
+ * proceeds to create a new thread if no pre-existing thread is available to take up the work.
+ * However, Schedulers.newThread() doesn't even use a thread pool; instead, it creates a
+ * new thread for every request and forgets them forever.
+ *
+ * In most of the cases, when you're not using Schedulers.computation(), you should
+ * consider Schedulers.io() and should predominantly avoid using
+ * Schedulers.newThread(); threads are very expensive resources, you should try to avoid
+ * the creation of new threads as much as possible.
  * */
