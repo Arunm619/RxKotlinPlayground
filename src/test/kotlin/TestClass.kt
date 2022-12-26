@@ -9,13 +9,17 @@ import kotlin.test.assertEquals
 
 class TestClass {
     @Test
-    fun `test with blockingLast`() {
-        val observable = listOf(2,10,5,6,9,8,7,1,4,3).toObservable()
+    fun `test with blockingIterable`() {
+        val list = listOf(2,10,5,6,9,8,7,1,4,3)
+        val observable = list.toObservable()
             .sorted()
-        val firstItem = observable.blockingLast()
-        assertEquals(10,firstItem)
+        val iterable = observable.blockingIterable()
+        assertEquals(list.sorted(),iterable.toList())
     }
     /**
-     * As we are expecting the last emitted item, we are checking equality with 10.
+     * The blockingIterable operator works in an interesting way, it passes an emission to the
+     * Iterable, then the Iterable will keep blocking the iterating thread until the next
+     * emission is available. This operator queues up unconsumed values until the Iterator can
+     * consume them, and this can cause OutOfMemory exceptions.
      * */
 }
