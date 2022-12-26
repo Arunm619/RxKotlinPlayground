@@ -1,3 +1,4 @@
+import io.reactivex.Observable
 import java.io.Closeable
 
 //Resource management
@@ -24,3 +25,31 @@ class Resource : Closeable {
         println("Resource Closed")
     }
 }
+
+fun main() {
+    Observable.using({//(1) resourceSupplier
+        Resource()
+    }, {//(2) sourceSupplier
+            resource: Resource ->
+        Observable.just(resource)
+    }, {//(3) disposer
+            resource: Resource ->
+        resource.close()
+    }).subscribe { resource ->
+        println("Resource Data ${resource.data}")
+    }
+}
+/**
+ * we passed three lambdas to the using operator.
+ * In the first lambda (comment one), we created an instance of Resource and returned it (in a lambda,
+ * the last statement works as return, you don't have to write it).
+ *
+ * The second lambda will take resource as parameter and will create the Observable from
+ * it to return.
+ *
+ * The third lambda will again take resource as a parameter and close it.
+ *
+ * The using operator will return the Observable you created in the second lambda for you
+ * to apply the RxKotlin chain to it.
+ *
+ * */
