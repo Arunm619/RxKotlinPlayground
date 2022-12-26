@@ -9,25 +9,13 @@ import kotlin.test.assertEquals
 
 class TestClass {
     @Test
-    fun `test Single with blockingGet`() {
+    fun `test with blockingLast`() {
         val observable = listOf(2,10,5,6,9,8,7,1,4,3).toObservable()
             .sorted()
-        val firstElement: Single<Int> = observable.first(0)
-        val firstItem = firstElement.blockingGet()
-        assertEquals(1,firstItem)
-    }
-    @Test
-    fun `test Maybe with blockingGet`() {
-        val observable = listOf(2,10,5,6,9,8,7,1,4,3).toObservable()
-            .sorted()
-        val firstElement: Maybe<Int> = observable.firstElement()
-        val firstItem = firstElement.blockingGet()
-        assertEquals(1,firstItem)
+        val firstItem = observable.blockingLast()
+        assertEquals(10,firstItem)
     }
     /**
-     * In the first test case, we used observable.first() with a default value, this operator
-     * returns a Single; on the second operator, we used observable.firstElement() this
-     * operator returns a Maybe. Then we used blockingGet in both test cases to get the first
-     * element as an Int and execute the test function.
+     * As we are expecting the last emitted item, we are checking equality with 10.
      * */
 }
