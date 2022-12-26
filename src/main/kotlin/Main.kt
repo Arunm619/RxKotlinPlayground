@@ -9,7 +9,7 @@ fun main() {
             println("Mapping $item ${Thread.currentThread().name}")
             return@map item.toInt()
         }
-        .subscribeOn(Schedulers.computation())
+        .subscribeOn(Schedulers.single())
         .subscribe { item ->
             println("Received $item${Thread.currentThread().name}")
         }
